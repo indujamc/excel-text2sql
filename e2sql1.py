@@ -39,7 +39,9 @@ def read_sql_query(sql, db):
 ## Function To Create Table from DataFrame
 def create_table_from_df(conn, df, table_name):
     cursor = conn.cursor()
+    # Replace spaces with underscores in column names
     columns = df.columns
+    columns = [col.replace(" ", "_") for col in columns]
     columns_sql = ', '.join([f'"{col}" TEXT' for col in columns])
     create_table_sql = f'''
     CREATE TABLE IF NOT EXISTS {table_name} (
@@ -51,9 +53,12 @@ def create_table_from_df(conn, df, table_name):
     conn.commit()
 
 ## Function To Insert Data from DataFrame into Database
+## Function To Insert Data from DataFrame into Database
 def insert_data_from_df(conn, df, table_name):
     cursor = conn.cursor()
+    # Replace spaces with underscores in column names
     columns = df.columns
+    columns = [col.replace(" ", "_") for col in columns]
     placeholders = ', '.join(['?'] * len(columns))
     insert_sql = f'''
     INSERT INTO {table_name} ({', '.join([f'"{col}"' for col in columns])})
@@ -62,6 +67,7 @@ def insert_data_from_df(conn, df, table_name):
     for index, row in df.iterrows():
         cursor.execute(insert_sql, tuple(row))
     conn.commit()
+    
 
 ## Function To Fetch Column Names from Database
 def get_table_columns(db, table_name):
@@ -130,22 +136,22 @@ if submit:
     # Construct dynamic prompt
     column_list = ', '.join(columns)
     prompt = f"""
-    You are an expert in converting English questions to SQL queries!
-    The SQL database has the name {table_name} and has the following columns: {column_list}.
+You are an expert in converting English questions to SQL queries!
+The SQL database has the name {table_name} and has the following columns: {', '.join([col.replace(" ", "_") for col in columns])}.
 
-    For example,
-    Example 1 - How many records are present?,
-    the SQL command will be something like this: SELECT COUNT(*) FROM {table_name};
+For example,
+Example 1 - How many records are present?,
+the SQL command will be something like this: SELECT COUNT(*) FROM {table_name};
 
-    Example 2 - List all records where [column_name]='value',
-    the SQL command will be something like this: SELECT * FROM {table_name} WHERE [column_name]='value';
+Example 2 - List all records where [column_name]='value',
+the SQL command will be something like this: SELECT * FROM {table_name} WHERE [column_name]='value';
 
-    Example 3 - What is the average of [column_name]?,
-    the SQL command will be something like this: SELECT AVG([column_name]) FROM {table_name};
+Example 3 - What is the average of [column_name]?,
+the SQL command will be something like this: SELECT AVG([column_name]) FROM {table_name};
 
-    Also, the SQL code should not have
+Also, the SQL code should not have 
 at the beginning or end, and avoid using the word "sql" in the output.
-    """
+"""
 
     response = get_gemini_response(question, prompt)
     st.subheader("Generated SQL Query")
