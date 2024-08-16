@@ -99,7 +99,7 @@ st.set_page_config(page_title="SQL Query App")
 table_name = st.text_input("Enter the table name:", value="DYNAMIC_TABLE")
 
 # File uploader
-st.title("Upload and Import Excel Data")
+st.title("Query your Excel")
 uploaded_file = st.file_uploader("Choose an Excel file", type="xlsx")
 
 if uploaded_file is not None:
